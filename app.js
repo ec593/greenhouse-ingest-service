@@ -1,6 +1,10 @@
 import express from "express";
 import db from "./db/index.js";
 import Redis from "ioredis";
+import { verifyInternalSecret } from "./auth.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -12,7 +16,7 @@ const insertData = db.prepare(`
 
 const redis = new Redis();
 
-app.post("/data", (req, res) => {
+app.post("/data", verifyInternalSecret, (req, res) => {
     const { deviceId, timestamp, ...payload } = req.body;
     try {
         const payloadString = JSON.stringify(payload);
@@ -25,4 +29,4 @@ app.post("/data", (req, res) => {
     }
 });
 
-app.listen(3001, () => console.log("Ingest service listening on 3001"));
+app.listen(3001, "127.0.0.1",  () => console.log("Ingest service listening on 3001"));
